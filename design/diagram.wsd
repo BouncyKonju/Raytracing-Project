@@ -1,0 +1,166 @@
+@startuml raytracing
+
+skinparam classAttributeIconSize 0
+left to right direction
+
+class Ray {
+    +start : Vec3
+    +dir : Vec3
+    +i : int
+    +j : int
+    --
+    +Ray(Vec3, Vec3)
+    +Ray(Vec3, Vec3&&)
+    +Ray(Vec3, double, double, double)
+}
+
+class LightSource {
+    +pos : Vec3
+    +col : Vec3
+    --
+    +LightSource(Vec3, Vec3)
+    +LightSource(double, double, double, double, double, double)
+}
+
+class FullTransform {
+    +matrix : Matrix4x4
+    +invmatrix : Matrix4x4
+    +obj : shared_ptr<Object>
+    --
+    +FullTransform(Matrix4x4, Matrix4x4)
+}
+
+class ComplexObject {
+    +operation : ComplexOps
+    +left : shared_ptr<Object>
+    +right : shared_ptr<Object>
+    --
+    +ComplexObject(ComplexOps, shared_ptr<Object>, shared_ptr<Object>)
+}
+
+class TransformedObject {
+    +operation : TransformOps
+    +scale : Vec3
+    +obj : shared_ptr<Object>
+    --
+    +TransformedObject(TransformOps, Vec3, shared_ptr<Object>)
+    +TransformedObject(TransformOps, double, double, double, shared_ptr<Object>)
+    +getMatrix() : Matrix4x4
+    +getInverseMatrix() : Matrix4x4
+}
+
+class BaseObject {
+    +pos : Vec3
+    +rd : double
+    +bt: BaseTypes
+    +mat : shared_ptr<Material>
+    --
+    +BaseObject(BaseTypes, Vec3, double, shared_ptr<Material>)
+    +BaseObject(BaseTypes, double, double, double, double, shared_ptr<Material>)
+    +BaseObject(BaseTypes, Vec3, double, unsigned)
+    +BaseObject(BaseTypes, double, double, double, double, unsigned)
+}
+
+class Object {
+    #_type : ObjectType
+    +mat_id : unsigned
+    --
+    +Object()
+    +~Object()
+    +type() : ObjectType
+}
+
+class Material {
+    +mat_id : unsigned
+    +ambref : double
+    +diffRef : double
+    +specRef : double
+    +rflec : double
+    +rfrac : double
+    +rfracind : double
+    +shiny : double
+    +color : Vec3
+    --
+    +Material(double, double, double, double, double, double, double, Vec3)
+    +Material(double, double, double, double, double, double, double, double, double, double)
+}
+
+class Interpreter {
+    +topObject : shared_ptr<Object>
+    +base_objs : unsigned
+    +variables : map<string, double>
+    +lightSources : map<string, shared_ptr<LightSource>>
+    +materials : map<string, shared_ptr<Material>>
+    +rays : vector<shared_ptr<Ray>>
+    +EyePos : Vec3
+    +LookAt : Vec3
+    -fov : double
+    --
+    +Interpreter()
+    +interpretFile(string) : void
+    -interpret(ifstream) : void
+    -createRays() : void
+    -shorten(shared_ptr<Object>) : shared_ptr<Object>
+}
+
+class Vec3 {
+    +vals : double[3]
+    --
+    +Vec3(double, double, double)
+    +Vec3(Vec3)
+    +Vec3(Vec3&&)
+    +operator*(Vec3) : double
+    +operator*(double) : Vec3
+    +operator%(Vec3) : Vec3
+    +operator+(Vec3) : Vec3
+    +operator-(Vec3) : Vec3
+    +operator/(double) : Vec3
+    +len() : double
+    +normalise() : Vec3
+    +x() : double
+    +y() : double
+    +z() : double
+}
+
+class Vec4 {
+    +vals : double[4]
+    --
+    +Vec4(double, double, double, double)
+    +Vec4(Vec3&)
+    +operator*(Vec4&) : double
+    +x() : double
+    +y() : double
+    +z() : double
+    +h() : double
+}
+
+class Matrix4x4 {
+    +mat : double[4][4]
+    --
+    +Matrix4x4(double[4][4])
+    +Matrix4x4(double)
+    +operator*(Matrix4x4&) : Matrix4x4
+    +operator*(Vec3&) : Vec4
+    +operator*(Vec4&) : Vec4
+}
+
+class AutoArray<T> {
+    +array : T*
+    --
+    +AutoArray(size_t)
+    +~AutoArray()
+}
+
+class Exception {
+    +id : unsigned
+    +description : string
+    --
+    +Exception(unsigned, string)
+}
+
+Object <|.. BaseObject
+Object <|.. TransformedObject
+Object <|.. ComplexObject
+Object <|.. FullTransform
+
+@enduml
